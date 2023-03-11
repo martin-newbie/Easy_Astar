@@ -77,8 +77,8 @@ public class UnitManager : MonoBehaviour
 
     GroundUnit GetGroundUnitByPos(Vector3 inputPos)
     {
-        int x = (int)(Mathf.RoundToInt(inputPos.x) / unitSize);
-        int y = (int)(Mathf.RoundToInt(inputPos.y) / unitSize);
+        int x = Mathf.RoundToInt(inputPos.x / unitSize);
+        int y = Mathf.RoundToInt(inputPos.y / unitSize);
 
         return unitArray[y, x];
     }
