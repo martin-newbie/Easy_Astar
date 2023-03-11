@@ -23,8 +23,8 @@ public class UnitManager : MonoBehaviour
     public GroundUnit startUnit;
     public GroundUnit endUnit;
 
-    List<GroundUnit> openList = new List<GroundUnit>();
-    List<GroundUnit> closedList = new List<GroundUnit>();
+    public List<GroundUnit> openList = new List<GroundUnit>();
+    public List<GroundUnit> closedList = new List<GroundUnit>();
 
 
     private void Start()
@@ -42,6 +42,7 @@ public class UnitManager : MonoBehaviour
                 var temp = Instantiate(unitPrefab, transform);
                 temp.transform.position = GetPosByIndex(y, x);
                 temp.PosInit(x, y);
+                temp.gameObject.name += string.Format("_({0}, {1})", x, y);
                 unitArray[y, x] = temp;
             }
         }
@@ -82,6 +83,7 @@ public class UnitManager : MonoBehaviour
         return unitArray[y, x];
     }
 
+    bool isPathFinding = false;
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Alpha0)) curState = 0;
@@ -119,36 +121,49 @@ public class UnitManager : MonoBehaviour
                 unit.ReverseUnitType();
         }
 
-        if (Input.GetKeyDown(KeyCode.Space) && startUnit != null && endUnit != null)
+        if (Input.GetKeyDown(KeyCode.Space) && startUnit != null && endUnit != null && !isPathFinding)
         {
-            PathFind();
+            StartCoroutine(PathFindCoroutine());
         }
     }
 
-    void PathFind()
+    IEnumerator PathFindCoroutine()
     {
+        isPathFinding = true;
         GroundUnit curUnit = startUnit;
+        closedList.Add(curUnit);
 
         while (curUnit != endUnit)
         {
-
-
             TryAddToOpenlist(curUnit.x + 1, curUnit.y, curUnit.g, curUnit);
             TryAddToOpenlist(curUnit.x - 1, curUnit.y, curUnit.g, curUnit);
             TryAddToOpenlist(curUnit.x, curUnit.y + 1, curUnit.g, curUnit);
             TryAddToOpenlist(curUnit.x, curUnit.y - 1, curUnit.g, curUnit);
 
             var lowest = FindLowestUnit();
+            if (lowest == null)
+            {
+                // no way available
+                yield break;
+            }
+
             openList.Remove(lowest);
             closedList.Add(lowest);
+
+            lowest.model.color = new Color(0.8f, 0.3f, 0.1f);
             curUnit = lowest;
+
+            yield return new WaitForSeconds(0.1f);
         }
 
         while (curUnit != startUnit)
         {
             curUnit.model.color = new Color(1f, 1f, 0f);
             curUnit = curUnit.parentUnit;
+
+            yield return new WaitForSeconds(0.1f);
         }
+        yield break;
     }
 
     bool TryAddToOpenlist(int x, int y, int cost, GroundUnit parent)
@@ -163,13 +178,14 @@ public class UnitManager : MonoBehaviour
         {
             return false;
         }
-        if (closedList.Contains(unit))
+        if (closedList.Contains(unit) || openList.Contains(unit))
         {
             return false;
         }
 
         unit.SetCost(endUnit, ++cost);
         unit.SetParent(parent);
+        unit.model.color = new Color(1, 1, 0.5f);
         openList.Add(unit);
 
         return true;
