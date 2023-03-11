@@ -125,11 +125,39 @@ public class UnitManager : MonoBehaviour
         {
             StartCoroutine(PathFindCoroutine());
         }
+        else if(Input.GetKeyDown(KeyCode.Space) && isPathFinding)
+        {
+            InitAll();
+            isPathFinding = false;
+        }
+    }
+
+    void InitAll()
+    {
+        startUnit = null;
+        endUnit = null;
+
+        openList.Clear();
+        closedList.Clear();
+
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                unitArray[y, x].unitType = UnitType.GROUND;
+                unitArray[y, x].model.color = Color.white;
+
+                unitArray[y, x].SetCost(null, 0);
+            }
+        }
     }
 
     IEnumerator PathFindCoroutine()
     {
         isPathFinding = true;
+
+        yield return null;
+
         GroundUnit curUnit = startUnit;
         closedList.Add(curUnit);
 
@@ -153,7 +181,9 @@ public class UnitManager : MonoBehaviour
             lowest.model.color = new Color(0.8f, 0.3f, 0.1f);
             curUnit = lowest;
 
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitUntil(() => Input.anyKeyDown);
+
+            yield return null;
         }
 
         while (curUnit != startUnit)

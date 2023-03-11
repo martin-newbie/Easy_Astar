@@ -173,6 +173,8 @@ MonoBehaviour:
   curState: 0
   startUnit: {fileID: 0}
   endUnit: {fileID: 0}
+  openList: []
+  closedList: []
 --- !u!1 &243569071
 GameObject:
   m_ObjectHideFlags: 0

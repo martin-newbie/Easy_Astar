@@ -35,7 +35,9 @@ public class GroundUnit : MonoBehaviour
     public void SetCost(GroundUnit endUnit, int fromStart)
     {
         g = fromStart;
-        h = Mathf.Abs(endUnit.x - x) + Mathf.Abs(endUnit.y - y);
+        if (endUnit != null)
+            h = Mathf.Abs(endUnit.x - x) + Mathf.Abs(endUnit.y - y);
+        else h = 0;
         f = g + h;
 
         gTxt.text = g.ToString();
